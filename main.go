@@ -8,7 +8,6 @@ import (
 	"main/pkg/setting"
 	"main/pkg/util"
 	"main/routers"
-	"main/service"
 	"net/http"
 )
 
@@ -16,7 +15,7 @@ func init() {
 	setting.Setup()
 	models.Setup()
 	util.Setup()
-	service.InitData()
+	//service.InitData()
 }
 
 

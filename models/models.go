@@ -27,12 +27,12 @@ func Setup() {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("数据库连接失败: %v", err)
 	}
-	CreateTable([]interface{}{
-		&Role{},
-		&Account{},
-		&Questionnaire{},
-		&Question{},
-		&Option{},
-		&File{},
-	}, true)
+	//CreateTable([]interface{}{
+	//	&Role{},
+	//	&Account{},
+	//	&Questionnaire{},
+	//	&Question{},
+	//	&Option{},
+	//	&File{},
+	//}, true)
 }

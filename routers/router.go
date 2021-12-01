@@ -20,7 +20,13 @@ func InitRouter() *gin.Engine {
 		apiV1.PUT("/user/password", api.ResetPassword)
 		apiV1.POST("/user/register", api.RegisterAPI)
 
+
 		apiV1.POST("/questionnaire", api.CreateQuestionnaire)
+		apiV1.DELETE("/questionnaire", api.DeleteQuestionnaire)
+		apiV1.PUT("/questionnaire", api.UpdateQuestionnaire)
+		apiV1.GET("/questionnaire", api.GetQuestionnaire)
+		apiV1.GET("/questionnaires", api.GetQuestionnaires)
+
 		apiV1.POST("/questionnaire/question", api.AddQuestion)
 	}
 	return r

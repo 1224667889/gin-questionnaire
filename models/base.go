@@ -271,3 +271,17 @@ func Delete(model interface{}) error {
 	_, err = db.Exec(sql)
 	return err
 }
+
+func Count(model interface{}, odd string) (int, error) {
+	t := reflect.TypeOf(model)
+	tableName := strings.Split(t.String(), ".")[1]
+	sql := fmt.Sprintf("SELECT COUNT(*) FROM %s %s", tableName, odd)
+	logrus.Debugln(sql)
+	row := db.QueryRow(sql)
+	if row.Err() != nil {
+		return 0, row.Err()
+	}
+	var count int
+	err := row.Scan(&count)
+	return count, err
+}
