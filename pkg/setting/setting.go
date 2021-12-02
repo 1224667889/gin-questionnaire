@@ -32,6 +32,14 @@ type Database struct {
 
 var DatabaseSetting = &Database{}
 
+type Mongo struct {
+	Host 	string
+	Port 	int
+	Name 	string
+}
+
+var MongoSetting = &Mongo{}
+
 var cfg *ini.File
 
 // Setup APP基础设置
@@ -45,6 +53,7 @@ func Setup() {
 	mapSetting("app", AppSetting)
 	mapSetting("server", ServerSetting)
 	mapSetting("database", DatabaseSetting)
+	mapSetting("mongo", MongoSetting)
 
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second

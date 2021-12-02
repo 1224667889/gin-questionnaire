@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"main/models"
+	"main/mongo"
 	"main/pkg/setting"
 	"main/pkg/util"
 	"main/routers"
@@ -15,6 +16,7 @@ func init() {
 	setting.Setup()
 	models.Setup()
 	util.Setup()
+	mongo.Setup()
 	//service.InitData()
 }
 

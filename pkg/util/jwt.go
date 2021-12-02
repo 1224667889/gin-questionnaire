@@ -16,7 +16,7 @@ type Claims struct {
 // GenerateToken 生成token
 func GenerateToken(id string) (string, error) {
 	nowTime := time.Now()
-	expireTime := nowTime.Add(3 * time.Hour)
+	expireTime := nowTime.Add(24 * 7 * time.Hour)
 
 	claims := Claims{
 		//EncodeMD5(id),

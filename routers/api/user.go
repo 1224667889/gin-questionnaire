@@ -19,7 +19,7 @@ func LoginAPI(c *gin.Context) {
 		Password string `form:"password" json:"password" xml:"password" binding:"required"`
 	}{}
 	if err := c.ShouldBindJSON(&params); err != nil {
-		g.Response(http.StatusOK, e.INVALID_PARAMS, "参数错误")
+		g.Response(http.StatusOK, e.INVALID_PARAMS, err.Error())
 		return
 	}
 	var user models.Account
@@ -28,7 +28,7 @@ func LoginAPI(c *gin.Context) {
 		g.Response(http.StatusOK, e.INVALID_PARAMS, "账号不存在")
 		return
 	}
-	if user.Password == params.Password {
+	if user.Password != params.Password {
 		g.Response(http.StatusOK, e.INVALID_PARAMS, "密码错误")
 		return
 	}

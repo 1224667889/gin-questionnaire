@@ -1,6 +1,2 @@
 .idea/
-.DS_Store
-
-runtime/*
-!runtime/qrcode/bg.jpg
-!runtime/fonts
+.upload/

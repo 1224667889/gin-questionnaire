@@ -34,5 +34,5 @@ func Setup() {
 	//	&Question{},
 	//	&Option{},
 	//	&File{},
-	//}, true)
+	//}, false)
 }
