@@ -252,7 +252,7 @@ func Update(model interface{}) error {
 			sql += ",\n"
 		}
 	}
-	sql += fmt.Sprintf("\nWHERE %s = %s;", name, value)
+	sql += fmt.Sprintf("\nWHERE %s = '%s';", name, value)
 	logrus.Debugln(sql)
 	_, err = db.Exec(sql)
 	return err
@@ -266,7 +266,7 @@ func Delete(model interface{}) error {
 	if err != nil {
 		return err
 	}
-	sql += fmt.Sprintf("\nWHERE %s = %s;", name, value)
+	sql += fmt.Sprintf("\nWHERE %s = '%s';", name, value)
 	logrus.Debugln(sql)
 	_, err = db.Exec(sql)
 	return err
