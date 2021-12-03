@@ -41,11 +41,9 @@ func UploadFile(c *gin.Context){
 // DownloadFile 下载文件
 func DownloadFile(c *gin.Context){
 	g := app.Gin{C: c}
-	params := struct {
-		Uuid string        `form:"uuid" json:"uuid" xml:"uuid" binding:"required"`
-	}{}
-	if err := c.ShouldBindJSON(&params); err != nil {
-		g.Response(http.StatusOK, e.INVALID_PARAMS, err.Error())
+	uuid := c.DefaultQuery("uuid", "")
+	if uuid == "" {
+		g.Response(http.StatusOK, e.INVALID_PARAMS, nil)
 		return
 	}
 	id := c.MustGet("id").(string)
@@ -54,7 +52,7 @@ func DownloadFile(c *gin.Context){
 		g.Response(http.StatusOK, e.ERROR_AUTH_CHECK_TOKEN_FAIL, "用户信息未找到")
 		return
 	}
-	file := models.File{Id: params.Uuid}
+	file := models.File{Id: uuid}
 	if err := models.FindByKey(&file); err != nil {
 		g.Response(http.StatusOK, e.INVALID_PARAMS, "uuid解析错误")
 		return

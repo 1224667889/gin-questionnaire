@@ -57,6 +57,53 @@ func AddQuestion(c *gin.Context) {
 	return
 }
 
+// AddOption 添加选项
+func AddOption(c *gin.Context) {
+	g := app.Gin{C: c}
+	params := struct {
+		Content    string `form:"content" json:"content" xml:"content" binding:"required"`
+		QuestionId string `form:"question_id" json:"question_id" xml:"question_id" binding:"required"`
+	}{}
+	if err := c.ShouldBindJSON(&params); err != nil {
+		g.Response(http.StatusOK, e.INVALID_PARAMS, "参数错误")
+		return
+	}
+	id := c.MustGet("id").(string)
+	// 搜索问题
+	question := models.Question{Id: params.QuestionId}
+	if err := models.FindByKey(&question); err != nil {
+		g.Response(http.StatusOK, e.ERROR_DB, err.Error())
+		return
+	}
+	// 搜索问卷
+	questionnaire := models.Questionnaire{Id: question.QuestionnaireId}
+	if err := models.FindByKey(&questionnaire); err != nil {
+		g.Response(http.StatusOK, e.ERROR_DB, err.Error())
+		return
+	}
+	if questionnaire.AccountId != id {
+		g.Response(http.StatusOK, e.FORBIDDEN, "不能操作他人的问卷")
+		return
+	}
+	// 未发布过才能修改
+	if questionnaire.HasReleased != "false" {
+		g.Response(http.StatusOK, e.FORBIDDEN, "问卷已发布，不允许修改")
+		return
+	}
+	option := models.Option{
+		Id:         uuid.NewV4().String(),
+		Content:    params.Content,
+		QuestionId: question.Id,
+	}
+	if err := models.Insert(&option); err != nil {
+		logrus.Infoln(err.Error())
+		g.Response(http.StatusOK, e.ERROR_DB, "选项创建失败")
+		return
+	}
+	g.Response(http.StatusOK, e.SUCCESS, option)
+	return
+}
+
 // DeleteQuestion 删除问题
 func DeleteQuestion(c *gin.Context) {
 	g := app.Gin{C: c}

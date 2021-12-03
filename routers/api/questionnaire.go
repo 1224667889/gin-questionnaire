@@ -117,15 +117,13 @@ func UpdateQuestionnaire(c *gin.Context) {
 // GetQuestionnaire 获取一个问卷
 func GetQuestionnaire(c *gin.Context) {
 	g := app.Gin{C: c}
-	params := struct {
-		QuestionnaireId string `form:"questionnaire_id" json:"questionnaire_id" xml:"questionnaire_id" binding:"required"`
-	}{}
-	if err := c.ShouldBindJSON(&params); err != nil {
+	questionnaireId := c.DefaultQuery("questionnaire_id", "")
+	if questionnaireId == "" {
 		g.Response(http.StatusOK, e.INVALID_PARAMS, "参数错误")
 		return
 	}
 	id := c.MustGet("id").(string)
-	questionnaire := models.Questionnaire{Id: params.QuestionnaireId}
+	questionnaire := models.Questionnaire{Id: questionnaireId}
 	if err := models.FindByKey(&questionnaire); err != nil {
 		g.Response(http.StatusOK, e.ERROR_DB, err.Error())
 		return
@@ -161,25 +159,19 @@ func GetQuestionnaire(c *gin.Context) {
 // GetQuestionnaires 获取一堆问卷
 func GetQuestionnaires(c *gin.Context) {
 	g := app.Gin{C: c}
-	params := struct {
-		PageSize int `form:"page_size" json:"page_size" xml:"page_size"`
-		PageNum  int `form:"page_sum" json:"page_sum" xml:"page_sum"`
-	}{}
+	pageSize := c.GetInt64("page_size")
+	pageNum := c.GetInt64("page_sum")
 	// 设置默认值
-	if params.PageNum <= 0 {
-		params.PageNum = 1
+	if pageNum <= 0 {
+		pageNum = 1
 	}
-	if params.PageSize <= 0 {
-		params.PageSize = 10
-	}
-	if err := c.ShouldBindJSON(&params); err != nil {
-		g.Response(http.StatusOK, e.INVALID_PARAMS, "参数错误")
-		return
+	if pageSize <= 0 {
+		pageSize = 10
 	}
 	id := c.MustGet("id").(string)
 	var questionnaires []models.Questionnaire
 	if err := models.Find(&questionnaires,
-		fmt.Sprintf("WHERE account_id = '%s' LIMIT %d OFFSET %d;", id, params.PageSize, params.PageSize * (params.PageNum - 1)));
+		fmt.Sprintf("WHERE account_id = '%s' LIMIT %d OFFSET %d;", id, pageSize, pageSize * (pageNum - 1)));
 		err != nil {
 		logrus.Infoln(err.Error())
 		g.Response(http.StatusOK, e.ERROR_DB, "问卷查询失败")
@@ -191,13 +183,49 @@ func GetQuestionnaires(c *gin.Context) {
 		g.Response(http.StatusOK, e.ERROR_DB, "问卷查询失败")
 		return
 	}
-	totalPage := count / params.PageSize
-	if totalPage % params.PageSize != 0 {
+	totalPage := count / int(pageSize)
+	if totalPage % int(pageSize) != 0 {
 		totalPage++
 	}
 	g.Response(http.StatusOK, e.SUCCESS, map[string]interface{}{
 		"questionnaires": questionnaires,
 		"total_page": totalPage,
 	})
+	return
+}
+
+// ReleaseQuestionnaire 发布问卷
+func ReleaseQuestionnaire(c *gin.Context) {
+	g := app.Gin{C: c}
+	params := struct {
+		QuestionnaireId string `form:"questionnaire_id" json:"questionnaire_id" xml:"questionnaire_id" binding:"required"`
+	}{}
+	if err := c.ShouldBindJSON(&params); err != nil {
+		g.Response(http.StatusOK, e.INVALID_PARAMS, "参数错误")
+		return
+	}
+	id := c.MustGet("id").(string)
+	questionnaire := models.Questionnaire{Id: params.QuestionnaireId}
+	if err := models.FindByKey(&questionnaire); err != nil {
+		g.Response(http.StatusOK, e.ERROR_DB, err.Error())
+		return
+	}
+	if questionnaire.AccountId != id {
+		g.Response(http.StatusOK, e.FORBIDDEN, "不能操作他人的问卷")
+		return
+	}
+	if questionnaire.HasReleased == "true" {
+		g.Response(http.StatusOK, e.FORBIDDEN, "文件已经发布")
+		return
+	}
+	questionnaire.HasReleased = "true"
+	questionnaire.IsOpen = "true"
+	fmt.Println(questionnaire)
+	if err := models.Update(&questionnaire); err != nil {
+		logrus.Infoln(err.Error())
+		g.Response(http.StatusOK, e.ERROR_DB, "问卷发布失败")
+		return
+	}
+	g.Response(http.StatusOK, e.SUCCESS, questionnaire)
 	return
 }

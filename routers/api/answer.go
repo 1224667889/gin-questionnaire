@@ -34,8 +34,8 @@ func UploadAnswer(c *gin.Context)  {
 		return
 	}
 	// 判断问卷开放
-	if questionnaire.IsOpen != "false" {
-		g.Response(http.StatusOK, e.FORBIDDEN, "问卷未开放")
+	if questionnaire.IsOpen == "false" || questionnaire.HasReleased == "false"  {
+		g.Response(http.StatusOK, e.FORBIDDEN, "问卷未开放或已关闭")
 		return
 	}
 	var id string
@@ -155,15 +155,13 @@ func UploadAnswer(c *gin.Context)  {
 // GetAnswers 获取答卷
 func GetAnswers(c *gin.Context) {
 	g := app.Gin{C: c}
-	params := struct {
-		QuestionnaireId string        `form:"questionnaire_id" json:"questionnaire_id" xml:"questionnaire_id" binding:"required"`
-	}{}
-	if err := c.ShouldBindJSON(&params); err != nil {
-		g.Response(http.StatusOK, e.INVALID_PARAMS, err.Error())
+	questionnaireId := c.DefaultQuery("questionnaire_id", "")
+	if questionnaireId == "" {
+		g.Response(http.StatusOK, e.INVALID_PARAMS, "参数错误")
 		return
 	}
 	// 搜索问卷
-	questionnaire := models.Questionnaire{Id: params.QuestionnaireId}
+	questionnaire := models.Questionnaire{Id: questionnaireId}
 	if err := models.FindByKey(&questionnaire); err != nil {
 		g.Response(http.StatusOK, e.ERROR_DB, "参数错误")
 		return

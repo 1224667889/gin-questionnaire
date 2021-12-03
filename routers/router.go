@@ -15,6 +15,8 @@ func InitRouter() *gin.Engine {
 	apiV1 := r.Group("/api/v1")
 	apiV1.POST("/login", api.LoginAPI)
 	apiV1.POST("/user/register", api.RegisterAPI)
+	apiV1.POST("/questionnaire/answer", api.UploadAnswer)
+	apiV1.POST("/file", api.UploadFile)
 	apiV1.Use(jwt.JWT())
 	{
 		apiV1.PUT("/user/detail", api.UpdateUser)
@@ -26,14 +28,14 @@ func InitRouter() *gin.Engine {
 		apiV1.PUT("/questionnaire", api.UpdateQuestionnaire)
 		apiV1.DELETE("/questionnaire", api.DeleteQuestionnaire)
 		apiV1.GET("/questionnaire/answer", api.GetAnswers)
-		apiV1.POST("/questionnaire/answer", api.UploadAnswer)
 
+		apiV1.PUT("/questionnaire/release", api.ReleaseQuestionnaire)
 
 		apiV1.POST("/question", api.AddQuestion)
 		apiV1.DELETE("/question", api.DeleteQuestion)
+		apiV1.POST("/question/option", api.AddOption)
 
 		apiV1.GET("/file", api.DownloadFile)
-		apiV1.POST("/file", api.UploadFile)
 	}
 	return r
 }
